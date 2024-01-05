@@ -1,0 +1,2 @@
+# vnpy_elitedb
+供VeighNa社区版使用的Elitedb数据库接口
