@@ -67,8 +67,8 @@ class ElitedbDatabase(BaseDatabase):
         if df.empty:
             return []
 
-        records = df.to_records(index=False)
-        return generate(records).tolist()
+        data = df.to_numpy()
+        return [BarData(*row) for row in data]
 
     @ staticmethod
     def load_bar_df(
@@ -91,6 +91,8 @@ class ElitedbDatabase(BaseDatabase):
         df["exchange"] = df["exchange"].apply(Exchange)
         df["interval"] = df["interval"].apply(Interval)
         df["datetime"] = df["datetime"].dt.tz_localize(DB_TZ)
+        df.insert(0, "gateway_name", "DB")
+        df.index = df["datetime"]
         return df
 
     @ staticmethod
@@ -132,25 +134,3 @@ class ElitedbDatabase(BaseDatabase):
     def save_tick_data(self, ticks: List[TickData], stream: bool = False) -> bool:
         """保存TICK数据"""
         pass
-
-
-def generate_bar_data(row) -> BarData:
-    """"""
-    bar = BarData(
-        symbol=row[0],
-        exchange=row[1],
-        datetime=row[2],
-        interval=row[3],
-        volume=row[4],
-        turnover=row[5],
-        open_interest=row[6],
-        open_price=row[7],
-        high_price=row[8],
-        low_price=row[9],
-        close_price=row[10],
-        gateway_name="DB"
-    )
-    return bar
-
-
-generate = np.vectorize(generate_bar_data)
